@@ -1,0 +1,196 @@
+{
+  "name": "Lead Lifecycle Automation",
+  "nodes": [
+    {
+      "id": "webhook-entry",
+      "name": "HubSpot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "path": "lead-lifecycle",
+        "options": {
+          "responseMode": "responseNode",
+          "rawBody": true
+        }
+      }
+    },
+    {
+      "id": "ai-qualifier",
+      "name": "AI Lead Qualifier",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "parameters": {
+        "command": "python",
+        "arguments": "={{ $json.path }}/qualify_lead.py --input={{ $json.tempFile }}"
+      }
+    },
+    {
+      "id": "route-classification",
+      "name": "Route by Classification",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [750, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.classification }}",
+              "operation": "equal",
+              "value2": "HOT"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "clay-enrich",
+      "name": "Clay Enrichment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 150],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CLAY_API_URL }}/enrich",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-API-Key", "value": "={{ $env.CLAY_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "company", "value": "={{ $json.company }}" },
+            { "name": "name", "value": "={{ $json.name }}" }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "hubspot-update-hot",
+      "name": "Update HubSpot (HOT)",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [1250, 150],
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "matchBy": "email",
+        "additionalFields": {
+          "customProperties": {
+            "customProperties": [
+              { "name": "icp_score", "value": "={{ $json.total_score }}" },
+              { "name": "icp_classification", "value": "={{ $json.classification }}" },
+              { "name": "icp_industry_score", "value": "={{ $json.industry_score.score }}" },
+              { "name": "icp_title_score", "value": "={{ $json.title_score.score }}" },
+              { "name": "icp_size_score", "value": "={{ $json.size_score.score }}" },
+              { "name": "lead_status", "value": "new" }
+            ]
+          },
+          "associateWith": [
+            { "dealRole": "HOT_LEAD" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "slack-hot-alert",
+      "name": "Slack HOT Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1500, 150],
+      "parameters": {
+        "channel": "{{ $env.SLACK_HOT_LEADS_CHANNEL }}",
+        "text": "=🔥 HOT Lead: {{ $json.name }} at {{ $json.company }}\nScore: {{ $json.total_score }}/100\nTitle: {{ $json.job_title }}\nEnrichment: {{ $json.enrichment_summary }}\nAction: Assign AE immediately"
+      }
+    },
+    {
+      "id": "hubspot-warm",
+      "name": "Enroll WARM in Nurture",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [1000, 450],
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "additionalFields": {
+          "customProperties": {
+            "customProperties": [
+              { "name": "icp_score", "value": "={{ $json.total_score }}" },
+              { "name": "icp_classification", "value": "={{ $json.classification }}" },
+              { "name": "lead_status", "value": "nurturing" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "hubspot-nurture",
+      "name": "Enroll NURTURE in Drip",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [1000, 600],
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "additionalFields": {
+          "customProperties": {
+            "customProperties": [
+              { "name": "icp_score", "value": "={{ $json.total_score }}" },
+              { "name": "icp_classification", "value": "={{ $json.classification }}" },
+              { "name": "lead_status", "value": "long-term-nurture" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "noop-end",
+      "name": "End (NURTURE/DISQUALIFIED)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1000, 750],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "webhook-entry": {
+      "main": [[{ "node": "ai-qualifier", "type": "main", "index": 0 }]]
+    },
+    "ai-qualifier": {
+      "main": [[{ "node": "route-classification", "type": "main", "index": 0 }]]
+    },
+    "route-classification": {
+      "main": [
+        [{ "node": "clay-enrich", "type": "main", "index": 0 }],
+        [{ "node": "hubspot-warm", "type": "main", "index": 0 }]
+      ]
+    },
+    "clay-enrich": {
+      "main": [[{ "node": "hubspot-update-hot", "type": "main", "index": 0 }]]
+    },
+    "hubspot-update-hot": {
+      "main": [[{ "node": "slack-hot-alert", "type": "main", "index": 0 }]]
+    },
+    "hubspot-warm": {
+      "main": [[{ "node": "hubspot-nurture", "type": "main", "index": 0 }]]
+    },
+    "hubspot-nurture": {
+      "main": [[{ "node": "noop-end", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "staticData": null,
+  "pinData": {},
+  "versionId": "1.0",
+  "triggerCount": 0,
+  "tag": "lead-lifecycle"
+}
