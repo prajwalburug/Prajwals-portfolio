@@ -7,8 +7,9 @@ I build go-to-market systems that turn fragmented tools, messy data, and manual 
 ## Case Studies
 
 | # | Project | Workflows | Problem | Tech | Code |
-|---|---------|-----------|---------|------|------|
+|--|---------|-----------|---------|------|------|
 | 1 | **Wati AI-First GTM Engine** | Lead Lifecycle · Pipeline Intelligence · Outbound Detection | Scaling revenue without scaling headcount for a 16K+ customer WhatsApp platform | HubSpot · n8n · Python · LLM · Clay · SQL | [`wati-gtm-engine/`](./wati-gtm-engine) |
+| 2 | **AI Content Studio** | Research · Generation · Repurposing · Brand Compilation | Inconsistent brand voice across LinkedIn, email, and blog | Obsidian · Python · Firecrawl · n8n · Claude/ChatGPT | [`ai-content-studio/`](./ai-content-studio) |
 
 ### 1. Wati AI-First GTM Engine
 
@@ -40,6 +41,31 @@ Signals ──► Scout (jobs/funding/leadership/tech) ──► Prioritizer ─
 <span class="tag">Lead Routing</span> <span class="tag">AI Scoring</span> <span class="tag">HubSpot</span> <span class="tag">n8n</span> <span class="tag">Pipeline Analytics</span> <span class="tag">Outbound</span>
 
 ➡️ [Full case study →](./wati-gtm-engine)
+
+### 2. AI Content Studio
+
+**The Problem:** Content teams struggle with inconsistent brand voice across channels. Every platform has different rules (LinkedIn char limits, email subject length, blog SEO), but the underlying message should be the same. Without a system, each piece of content requires re-stating brand guidelines from scratch.
+
+**What We Built:** A three-layer content system — research (Firecrawl) → swipe file (Obsidian) → generation (Python agents). A portable `writing-skills.md` compiles brand voice + swipe file patterns + channel rules into a single file that any AI can ingest.
+
+| Agent | What It Does |
+|-------|-------------|
+| `compile_skills.py` | Brand kit + swipe file → portable `writing-skills.md` |
+| `generate_linkedin.py` | LinkedIn post drafts (2 variants, brand-voice) |
+| `generate_email.py` | Cold email & newsletter drafts |
+| `generate_blog.py` | Blog outline → full draft with SEO metadata |
+| `repurpose.py` | One piece → LinkedIn + email + blog variants |
+| `research_scout.py` | Firecrawl-powered performance pattern analysis |
+
+**Why It Works:**
+- `writing-skills.md` loads into Claude Projects, ChatGPT Custom GPTs, Gemini — one file, any AI
+- All agents have `--demo` + `--dry-run` — see real output with zero setup
+- Obsidian-native brand vault — no database, no vendor lock-in
+- Research-backed: performance patterns feed the swipe file, which feeds generation
+
+**Tech Stack:** Python 3 · Obsidian · Firecrawl · n8n · Claude/OpenAI/Gemini
+
+➡️ [Full case study →](./ai-content-studio)
 
 ---
 
