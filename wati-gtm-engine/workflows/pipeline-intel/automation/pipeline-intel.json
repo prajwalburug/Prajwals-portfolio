@@ -1,0 +1,136 @@
+{
+  "name": "Pipeline Intelligence — Daily Risk Scan",
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Daily Cron Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "cron", "expression": "0 8 * * 1-5"}]
+        }
+      }
+    },
+    {
+      "id": "fetch-deals",
+      "name": "Fetch HubSpot Deals",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 300],
+      "parameters": {
+        "url": "https://api.hubapi.com/crm/v3/objects/deals",
+        "options": {
+          "qs": {
+            "limit": 100,
+            "properties": ["dealname", "amount", "dealstage", "createdate", "hs_lastmodifieddate", "notes_last_updated", "hubspot_owner_id", "num_associated_contacts", "notes"]
+          }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true
+      }
+    },
+    {
+      "id": "extract-deals",
+      "name": "Extract Deal Data",
+      "type": "n8n-nodes-base.set",
+      "position": [720, 300],
+      "parameters": {
+        "values": {
+          "string": [
+            {"name": "deal_id", "value": "={{ $json.id }}"},
+            {"name": "deal_name", "value": "={{ $json.properties.dealname }}"},
+            {"name": "amount", "value": "={{ $json.properties.amount }}"},
+            {"name": "stage", "value": "={{ $json.properties.dealstage }}"},
+            {"name": "created_date", "value": "={{ $json.properties.createdate }}"},
+            {"name": "last_activity", "value": "={{ $json.properties.hs_lastmodifieddate }}"},
+            {"name": "notes", "value": "={{ $json.properties.notes }}"},
+            {"name": "stakeholder_count", "value": "={{ $json.properties.num_associated_contacts }}"},
+            {"name": "owner_id", "value": "={{ $json.properties.hubspot_owner_id }}"}
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "call-analyze",
+      "name": "Call analyze_pipeline.py",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [960, 300],
+      "parameters": {
+        "command": "python",
+        "arguments": [
+          "workflows/pipeline-intel/code/analyze_pipeline.py",
+          "--input",
+          "/tmp/deals.json",
+          "--dry-run"
+        ]
+      }
+    },
+    {
+      "id": "call-next-best",
+      "name": "Call next_best_action.py",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [1200, 300],
+      "parameters": {
+        "command": "python",
+        "arguments": [
+          "workflows/pipeline-intel/code/next_best_action.py",
+          "--input",
+          "/tmp/risk_scores.json"
+        ]
+      }
+    },
+    {
+      "id": "send-slack",
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "position": [1440, 300],
+      "parameters": {
+        "channel": "pipeline-risk-alerts",
+        "text": "={{ 'Pipeline Risk Scan Complete\\nHigh Risk: ' + $node['call-analyze'].json.summary.high + '\\nMedium Risk: ' + $node['call-analyze'].json.summary.medium + '\\nActions generated: ' + $node['call-next-best'].json.total }}",
+        "as_user": true
+      }
+    },
+    {
+      "id": "if-high-risk",
+      "name": "Has High-Risk Deals?",
+      "type": "n8n-nodes-base.if",
+      "position": [1440, 500],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['call-analyze'].json.summary.high }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "send-email",
+      "name": "Email Risk Report",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1680, 600],
+      "parameters": {
+        "fromEmail": "pipeline-bot@wati.com",
+        "toEmail": "sales-leadership@wati.com",
+        "subject": "Pipeline Risk Alert — {{ $node['call-analyze'].json.summary.high }} high-risk deals detected",
+        "text": "={{ JSON.stringify($node['call-next-best'].json, null, 2) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Daily Cron Trigger": {"main": [[{"node": "Fetch HubSpot Deals"}]]},
+    "Fetch HubSpot Deals": {"main": [[{"node": "Extract Deal Data"}]]},
+    "Extract Deal Data": {"main": [[{"node": "Call analyze_pipeline.py"}]]},
+    "Call analyze_pipeline.py": {"main": [[{"node": "Call next_best_action.py"}]]},
+    "Call next_best_action.py": {"main": [[{"node": "Send Slack Alert"}, {"node": "Has High-Risk Deals?"}]]},
+    "Has High-Risk Deals?": {
+      "true": [[{"node": "Email Risk Report"}]],
+      "false": []
+    }
+  }
+}
