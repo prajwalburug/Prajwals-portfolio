@@ -1,0 +1,140 @@
+{
+  "name": "Content Studio — Generation Workflow",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "parameters": {
+        "path": "content-studio/generate",
+        "options": {
+          "responseMode": "lastNode"
+        }
+      }
+    },
+    {
+      "id": "choose-agent",
+      "name": "Choose Agent Type",
+      "type": "n8n-nodes-base.switch",
+      "position": [480, 300],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.content_type }}",
+        "options": {
+          "string": [
+            {"name": "linkedin", "value": "linkedin"},
+            {"name": "email", "value": "email"},
+            {"name": "blog", "value": "blog"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "run-linkedin",
+      "name": "Run LinkedIn Generator",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [720, 200],
+      "parameters": {
+        "command": "python",
+        "arguments": [
+          "code/generate_linkedin.py",
+          "--brand",
+          "={{ $json.brand }}",
+          "--topic",
+          "={{ $json.topic }}",
+          "--angle",
+          "={{ $json.angle || 'thought-leadership' }}",
+          "--variants",
+          "={{ $json.variants || 2 }}",
+          "--dry-run"
+        ]
+      }
+    },
+    {
+      "id": "run-email",
+      "name": "Run Email Generator",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [720, 400],
+      "parameters": {
+        "command": "python",
+        "arguments": [
+          "code/generate_email.py",
+          "--brand",
+          "={{ $json.brand }}",
+          "--topic",
+          "={{ $json.topic }}",
+          "--type",
+          "={{ $json.email_type || 'cold' }}",
+          "--dry-run"
+        ]
+      }
+    },
+    {
+      "id": "run-blog",
+      "name": "Run Blog Generator",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [720, 600],
+      "parameters": {
+        "command": "python",
+        "arguments": [
+          "code/generate_blog.py",
+          "--brand",
+          "={{ $json.brand }}",
+          "--topic",
+          "={{ $json.topic }}",
+          "--seo-keyword",
+          "={{ $json.seo_keyword || '' }}",
+          "--dry-run"
+        ]
+      }
+    },
+    {
+      "id": "format-output",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.set",
+      "position": [960, 300],
+      "parameters": {
+        "values": {
+          "string": [
+            {"name": "content_type", "value": "={{ $json.content_type }}"},
+            {"name": "preview", "value": "={{ JSON.stringify($json.variants || $json.outline || $json, null, 2).slice(0, 500) }}"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "slack-notify",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "position": [1200, 300],
+      "parameters": {
+        "channel": "content-studio",
+        "text": "={{ 'New content generated\\nType: ' + $json.content_type + '\\nTopic: ' + $json.topic }}",
+        "as_user": true
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [1200, 500],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {"main": [[{"node": "Choose Agent Type"}]]},
+    "Choose Agent Type": {
+      "linkedin": [[{"node": "Run LinkedIn Generator"}]],
+      "email": [[{"node": "Run Email Generator"}]],
+      "blog": [[{"node": "Run Blog Generator"}]]
+    },
+    "Run LinkedIn Generator": {"main": [[{"node": "Format Output"}]]},
+    "Run Email Generator": {"main": [[{"node": "Format Output"}]]},
+    "Run Blog Generator": {"main": [[{"node": "Format Output"}]]},
+    "Format Output": {"main": [[{"node": "Slack Notification"}, {"node": "Return Response"}]]}
+  }
+}
