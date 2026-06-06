@@ -1,0 +1,44 @@
+[
+  {
+    "company": "Meridian Capital Partners",
+    "domain": "meridiancap.com",
+    "industry": "Financial Services",
+    "headcount": 245,
+    "revenue_range": "$50M-$100M",
+    "funding_total": 42000000,
+    "funding_round": "Series B",
+    "funding_date": "2026-05-15",
+    "tech_stack": ["Salesforce", "Excel", "Slack", "Notion"],
+    "headquarters": "San Francisco, CA",
+    "linkedin_url": "https://linkedin.com/company/meridian-capital",
+    "description": "Meridian Capital Partners is a mid-market private equity firm specializing in growth-stage technology investments."
+  },
+  {
+    "company": "Apex Analytics",
+    "domain": "apexanalytics.io",
+    "industry": "SaaS - Analytics",
+    "headcount": 89,
+    "revenue_range": "$10M-$25M",
+    "funding_total": 12000000,
+    "funding_round": "Series A",
+    "funding_date": "2026-04-01",
+    "tech_stack": ["HubSpot", "Tableau", "Snowflake", "Slack", "Notion", "Jira"],
+    "headquarters": "Austin, TX",
+    "linkedin_url": "https://linkedin.com/company/apex-analytics",
+    "description": "Apex Analytics provides real-time business intelligence dashboards for mid-market companies."
+  },
+  {
+    "company": "NorthStar Equity Group",
+    "domain": "northstarequity.com",
+    "industry": "Financial Services - Asset Management",
+    "headcount": 512,
+    "revenue_range": "$100M-$250M",
+    "funding_total": null,
+    "funding_round": null,
+    "funding_date": null,
+    "tech_stack": ["Salesforce", "Excel", "Bloomberg Terminal", "Allvue"],
+    "headquarters": "New York, NY",
+    "linkedin_url": "https://linkedin.com/company/northstar-equity",
+    "description": "NorthStar Equity Group is an asset management firm with a portfolio of $4.2B AUM."
+  }
+]
