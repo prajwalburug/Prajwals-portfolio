@@ -153,4 +153,4 @@ ai-content-studio/
 
 ---
 
-*Built as part of a GTM engineering portfolio. Sample brand: Awesome Hires — AI-powered hiring platform.*
+*Built as part of a GTM engineering portfolio. For Brand: Awesome Hires — AI-powered hiring platform.*
