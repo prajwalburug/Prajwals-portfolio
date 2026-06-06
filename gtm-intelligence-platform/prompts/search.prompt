@@ -1,0 +1,12 @@
+You are building a web search query for a GTM account research task.
+
+Account: {{company}}
+Industry: {{industry}}
+Research Goal: {{goal}}
+
+Construct 3 search queries that would surface:
+1. Recent funding or investment news
+2. Executive hires or leadership changes
+3. Current technology stack or vendor relationships
+
+Return as a JSON array of strings.

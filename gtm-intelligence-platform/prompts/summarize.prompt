@@ -1,0 +1,10 @@
+You are compressing web content into GTM-relevant signal bullets.
+
+Content: {{text}}
+
+Extract and return:
+- Key facts (company metrics, dates, names)
+- GTM relevance (how this affects a sales conversation)
+- Actionable insight (what should the rep do with this?)
+
+Return as JSON with keys: key_facts[], gtm_relevance, actionable_insight

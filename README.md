@@ -10,6 +10,7 @@ I build go-to-market systems that turn fragmented tools, messy data, and manual 
 |--|---------|-----------|---------|------|------|
 | 1 | **Wati AI-First GTM Engine** | Lead Lifecycle · Pipeline Intelligence · Outbound Detection | Scaling revenue without scaling headcount for a 16K+ customer WhatsApp platform | HubSpot · n8n · Python · LLM · Clay · SQL | [`wati-gtm-engine/`](./wati-gtm-engine) |
 | 2 | **AI Content Studio** | Research · Generation · Repurposing · Brand Compilation | Inconsistent brand voice across LinkedIn, email, and blog | Obsidian · Python · Firecrawl · n8n · Claude/ChatGPT | [`ai-content-studio/`](./ai-content-studio) |
+| 3 | **GTM Intelligence Platform** | Account Research & Competitive Intelligence | MCP-native AI agents for revenue intelligence | Python · MCP · Claude · PostgreSQL · Clay | [`gtm-intelligence-platform/`](./gtm-intelligence-platform) |
 
 ### 1. Wati AI-First GTM Engine
 
@@ -66,6 +67,32 @@ Signals ──► Scout (jobs/funding/leadership/tech) ──► Prioritizer ─
 **Tech Stack:** Python 3 · Obsidian · Firecrawl · n8n · Claude/OpenAI/Gemini
 
 ➡️ [Full case study →](./ai-content-studio)
+
+### 3. GTM Intelligence Platform
+
+**The Problem:** Sales reps waste hours researching accounts before outreach. Data lives in silos — CRM here, enrichment there, signals everywhere. No single view tells a rep "is this worth my time, and what should I say?"
+
+**What We Built:** An MCP-native agent that automates the full account research pipeline — enrichment, signal scoring, competitive intel, brief generation, and email drafting — in one shot.
+
+**Pipeline (7 steps):**
+1. CRM context pull (`search_deals`)
+2. Firmographic enrichment (`enrich_account` — Clay mock)
+3. Web signal search (`search_web` — news, jobs, exec changes)
+4. Weighted intent scoring (funding 3x, exec 2.5x, hiring 2x, tech 1.5x)
+5. Competitive intelligence overlay (incumbent detection, switching signals)
+6. Structured brief generation + personalized email
+7. Write-back to file store + database
+
+**Why It Works:**
+- MCP-native: 6 typed tools expose via stdio transport — works in Claude Code, OpenCode, or any MCP client
+- Weighted signal scoring engine normalizes multiple signals into a single 0-100 ICP fit score
+- Portable skills layer: 3 markdown skills (`account-research.md`, `signal-scoring.md`, `brief-gen.md`) load into any AI
+- All tools support `--demo` + `--dry-run` modes
+- Clay + Gong mocks mirror real API shapes — proves integration understanding
+
+**Tech Stack:** Python 3 · MCP SDK · Claude API · PostgreSQL + pgvector · Redis · Clay (mock) · Gong (mock)
+
+➡️ [Full case study →](./gtm-intelligence-platform)
 
 ---
 

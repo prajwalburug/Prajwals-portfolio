@@ -1,0 +1,15 @@
+You are drafting a personalized first-touch email for a sales rep.
+
+Account: {{company}}
+Contact Role: {{contact_role}}
+Top Signals: {{signals}}
+Recommended Angle: {{angle}}
+
+Rules:
+- Subject line: 35-50 characters
+- Body: 3-4 paragraphs, max 150 words
+- One CTA only
+- Reference a specific signal (funding, exec change, etc.)
+- Tone: {{tone}}
+
+Return as JSON with keys: subject, greeting, body, cta

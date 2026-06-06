@@ -1,0 +1,52 @@
+[
+  {
+    "call_id": "call-001",
+    "company": "Meridian Capital Partners",
+    "date": "2026-04-10",
+    "duration_seconds": 2340,
+    "participants": ["Jessica Ryan (AE)", "Mark Chen (CFO)"],
+    "topics": ["budget planning", "vendor evaluation timeline", "current tools review"],
+    "key_points": [
+      "Mark expressed frustration with manual reconciliation processes",
+      "Currently evaluating 3 vendors including Allvue",
+      "Decision expected Q3 2026",
+      "Budget allocated for new platform ($200K-$400K range)"
+    ],
+    "sentiment": "positive",
+    "action_items": ["Send ROI comparison vs Allvue", "Schedule technical demo"],
+    "meddpicc": {
+      "metrics": "Manual reconciliation takes 40hrs/month per fund",
+      "economic_buyer": "Mark Chen, CFO",
+      "decision_criteria": "Integration with existing Salesforce workflow",
+      "paper_process": "Budget approved, waiting for Q3 board review",
+      "identify_pain": "Manual processes not scaling with AUM growth",
+      "champion": "Mark Chen",
+      "competition": "Allvue (pilot in progress)"
+    }
+  },
+  {
+    "call_id": "call-002",
+    "company": "Apex Analytics",
+    "date": "2026-05-20",
+    "duration_seconds": 1860,
+    "participants": ["Tom Rivera (AE)", "Sarah Kim (CTO)"],
+    "topics": ["technical requirements", "integration needs", "timeline"],
+    "key_points": [
+      "Sarah wants API-first platform for custom dashboard integration",
+      "Current stack doesn't support real-time data processing",
+      "Looking to replace Tableau with embedded analytics solution",
+      "Timeline: technical evaluation in June, decision July"
+    ],
+    "sentiment": "neutral",
+    "action_items": ["Share API documentation", "Schedule technical deep-dive with engineering team"],
+    "meddpicc": {
+      "metrics": "Dashboard refresh latency exceeds 5 minutes",
+      "economic_buyer": "CTO with CEO sign-off",
+      "decision_criteria": "API quality, data freshness, ease of integration",
+      "paper_process": "No formal process yet — early stage",
+      "identify_pain": "Slow dashboards causing missed insights during investor calls",
+      "champion": "Sarah Kim, CTO",
+      "competition": "Tableau (incumbent), Looker (considering)"
+    }
+  }
+]
