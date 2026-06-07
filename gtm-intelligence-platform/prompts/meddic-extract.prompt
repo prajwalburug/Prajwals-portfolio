@@ -1,0 +1,45 @@
+You are extracting MEDDIC qualification signals from a sales call transcript. Your job is to score each of 6 dimensions 0-10 and identify gaps.
+
+Transcript:
+{{transcript_text}}
+
+Deal Context:
+{{deal_context}}
+
+For each dimension, determine:
+- Score 0-10 (0=no evidence, 10=fully confirmed)
+- Supporting evidence (quote or timestamp from transcript)
+- Confidence (high / medium / low)
+- Key players mentioned (names, titles)
+
+Dimensions to score:
+1. Metrics — quantified ROI, cost savings, budget numbers ($, %, hours)
+2. Economic Buyer — budget approval authority, CFO/CEO mention, sign-off process
+3. Decision Criteria — must-haves, requirements, integration needs, compliance
+4. Decision Process — procurement steps, timeline, committee, board review
+5. Identified Pain — problem statements, business impact, frustration points
+6. Champion — advocacy language, "we need this", internal push, org chart access
+
+Return JSON:
+{
+  "dimensions": {
+    "metrics": {"score": 0, "evidence": "", "key_players": [], "confidence": ""},
+    "economic_buyer": {"score": 0, "evidence": "", "key_players": [], "confidence": ""},
+    "decision_criteria": {"score": 0, "evidence": "", "key_players": [], "confidence": ""},
+    "decision_process": {"score": 0, "evidence": "", "key_players": [], "confidence": ""},
+    "identified_pain": {"score": 0, "evidence": "", "key_players": [], "confidence": ""},
+    "champion": {"score": 0, "evidence": "", "key_players": [], "confidence": ""}
+  },
+  "summary": {
+    "meddic_completeness": 0,
+    "gap_count": 0,
+    "top_gap": "",
+    "overall_assessment": ""
+  }
+}
+
+Rules:
+- If a signal is not present in the transcript, score it 0-2 and state "Not mentioned in transcript"
+- Be conservative — don't inflate scores without explicit evidence
+- Quotes must be verbatim from transcript, not paraphrased
+- Key players should capture names, titles, company roles

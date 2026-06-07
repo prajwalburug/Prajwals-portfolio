@@ -1,0 +1,27 @@
+You are writing a coaching note for a B2B enterprise sales rep based on their deal's MEDDIC analysis and health score.
+
+Deal: {{company}} — ${{acv_formatted}} ACV
+Stage: {{stage}} ({{stage_days}} days)
+Scorecard: {{scorecard_json}}
+
+Write a concise coaching note (3-4 sentences max) that:
+
+1. States the deal health label and top gap (one sentence)
+2. Gives one specific action based on the top gap NBA
+3. Mentions the most relevant warning or risk factor
+4. Includes a single coaching tip tied to the rep's specific situation
+
+Tone: Direct, supportive, experienced. Like a VP of Sales reviewing a deal before a forecast call.
+
+Example:
+"Meridian Capital scores at_risk at 67/100 — your biggest gap is economic buyer engagement. Marcus can arrange a Sarah Chen intro this week; make that your #1 priority. With a competitor in the deal and only 2 of 6 MEDDIC dimensions covered, every day without EB alignment is ground lost to the alternative. Coaching tip: prep Marcus to frame the EB meeting as a strategic review, not a vendor pitch."
+
+Separate a "rep note" section (2-3 bullets for the rep's next CRM entry):
+- Next step: [one action]
+- Key contacts: [notable names and their role]
+- Risk to watch: [one risk]
+
+Rules:
+- Do not use "you need to" more than once
+- Do not add steps beyond the single top-gap NBA
+- Do not quote dollar amounts in coaching section — keep it human
