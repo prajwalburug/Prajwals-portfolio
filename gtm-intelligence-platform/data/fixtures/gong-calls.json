@@ -1,36 +1,160 @@
 [
   {
-    "call_id": "call-001",
+    "call_id": "call-meridian-001",
+    "company": "Meridian Capital Partners",
+    "date": "2026-03-05",
+    "duration_seconds": 1860,
+    "participants": ["Jessica Ryan (AE)", "Tom Chen (VP Ops)"],
+    "topics": ["initial discovery", "manual reconciliation challenges", "current tooling", "budget availability"],
+    "key_points": [
+      "VP Ops spends 40hrs/month on manual LP reporting",
+      "Currently using Excel for fund administration",
+      "No formal budget allocated yet but CFO is aware of the pain",
+      "Tom mentions Sarah Chen as the 'person who signs off on anything over $50K'"
+    ],
+    "sentiment": "curious",
+    "action_items": ["Send case study on similar PE firm transformation", "Schedule technical demo"],
+    "meddpicc": {
+      "metrics": "40hrs/month spent on manual LP reporting across 3 funds",
+      "economic_buyer": "Sarah Chen, CFO (mentioned, not yet engaged)",
+      "decision_criteria": "Not yet defined — 'just want to see what's out there'",
+      "paper_process": "No formal procurement process identified",
+      "identify_pain": "Manual reconciliation not scaling as AUM grows",
+      "champion": "Tom Chen (VP Ops) — internal pain owner",
+      "competition": "None identified yet"
+    },
+    "full_transcript": [
+      {"speaker": "Jessica Ryan", "text": "Thanks for the time Tom. What does your current fund administration workflow look like?", "timestamp_sec": 0},
+      {"speaker": "Tom Chen", "text": "We're basically running everything in Excel. I've got three separate workbooks for our three funds, and every month end I spend about 40 hours manually reconciling LP statements.", "timestamp_sec": 15},
+      {"speaker": "Jessica Ryan", "text": "That's significant. And as AUM grows, that's only going to get more complex.", "timestamp_sec": 45},
+      {"speaker": "Tom Chen", "text": "Exactly. Sarah — our CFO — she's been asking why we can't close books faster. I told her we need a proper system, but I need to show her something concrete.", "timestamp_sec": 58},
+      {"speaker": "Jessica Ryan", "text": "Has there been any budget conversation around this?", "timestamp_sec": 80},
+      {"speaker": "Tom Chen", "text": "Not formally. Sarah controls anything above $50K. I'd need her buy-in for a platform purchase. But she knows the pain — she's the one who complained about reporting delays at the last board meeting.", "timestamp_sec": 92},
+      {"speaker": "Jessica Ryan", "text": "Good to know. What else is on your radar besides solving this problem?", "timestamp_sec": 120},
+      {"speaker": "Tom Chen", "text": "We're also looking at our CSP for managed services. But the reporting thing is the one that keeps me up at night. If we had a demo to show Sarah, that would help move things forward.", "timestamp_sec": 135}
+    ]
+  },
+  {
+    "call_id": "call-meridian-002",
     "company": "Meridian Capital Partners",
     "date": "2026-04-10",
     "duration_seconds": 2340,
     "participants": ["Jessica Ryan (AE)", "Mark Chen (CFO)"],
-    "topics": ["budget planning", "vendor evaluation timeline", "current tools review"],
+    "topics": ["budget planning", "vendor evaluation timeline", "current tools review", "ROI expectations"],
     "key_points": [
       "Mark expressed frustration with manual reconciliation processes",
       "Currently evaluating 3 vendors including Allvue",
       "Decision expected Q3 2026",
-      "Budget allocated for new platform ($200K-$400K range)"
+      "Budget allocated for new platform ($200K-$400K range)",
+      "Mark wants to see ROI comparison versus current Excel workflow"
     ],
     "sentiment": "positive",
     "action_items": ["Send ROI comparison vs Allvue", "Schedule technical demo"],
     "meddpicc": {
-      "metrics": "Manual reconciliation takes 40hrs/month per fund",
-      "economic_buyer": "Mark Chen, CFO",
-      "decision_criteria": "Integration with existing Salesforce workflow",
-      "paper_process": "Budget approved, waiting for Q3 board review",
-      "identify_pain": "Manual processes not scaling with AUM growth",
-      "champion": "Mark Chen",
-      "competition": "Allvue (pilot in progress)"
-    }
+      "metrics": "Manual reconciliation takes 40hrs/month per fund — Mark wants quantified ROI",
+      "economic_buyer": "Mark Chen, CFO (present on call, engaged)",
+      "decision_criteria": "Integration with existing Salesforce workflow, clear ROI payback period",
+      "paper_process": "Budget approved informally, waiting for Q3 board review for final sign-off",
+      "identify_pain": "Manual processes not scaling with AUM growth, board frustrated with reporting delays",
+      "champion": "Mark Chen, CFO — confirmed pain owner and budget holder",
+      "competition": "Allvue (pilot in progress), one other vendor"
+    },
+    "full_transcript": [
+      {"speaker": "Jessica Ryan", "text": "Mark, thanks for making the time. Tom mentioned you've been thinking about automating the reporting workflow.", "timestamp_sec": 0},
+      {"speaker": "Mark Chen", "text": "Yes. The board is tired of waiting 3 weeks for quarter-end reports. We're a PE firm — our LPs expect real-time visibility, not Excel attachments.", "timestamp_sec": 18},
+      {"speaker": "Jessica Ryan", "text": "What's the impact of that delay?", "timestamp_sec": 45},
+      {"speaker": "Mark Chen", "text": "One of our LPs threatened to reduce allocation last quarter because they felt we were behind on reporting compared to our peers. That's a $50M mandate at risk.", "timestamp_sec": 52},
+      {"speaker": "Jessica Ryan", "text": "That's significant. Have you looked at any solutions yet?", "timestamp_sec": 80},
+      {"speaker": "Mark Chen", "text": "We're evaluating three vendors including Allvue. I need to see a clear ROI comparison — what's the payback period, how many hours saved, what's the implementation timeline.", "timestamp_sec": 90},
+      {"speaker": "Jessica Ryan", "text": "We can definitely provide that. What's the decision timeline looking like?", "timestamp_sec": 115},
+      {"speaker": "Mark Chen", "text": "We have a board review in Q3. If I can take a recommendation to them with a solid business case, I expect approval. Budget-wise, we're looking at $200K to $400K annually.", "timestamp_sec": 128},
+      {"speaker": "Jessica Ryan", "text": "And from a process standpoint — who else needs to be involved in the decision?", "timestamp_sec": 155},
+      {"speaker": "Mark Chen", "text": "I can make the call within that range with board backing. The key criteria for me are Salesforce integration — we're not adding another system that doesn't talk to CRM — and a clear ROI timeline under 12 months.", "timestamp_sec": 168}
+    ]
   },
   {
-    "call_id": "call-002",
+    "call_id": "call-meridian-003",
+    "company": "Meridian Capital Partners",
+    "date": "2026-05-12",
+    "duration_seconds": 2100,
+    "participants": ["Jessica Ryan (AE)", "Tom Chen (VP Ops)", "Marcus Webb (Head of Ops)"],
+    "topics": ["technical demo", "Salesforce integration requirements", "implementation timeline", "champion alignment"],
+    "key_points": [
+      "Marcus Webb (Head of Ops) is enthusiastic — used 'we need this' language unprompted",
+      "Marcus shared internal org chart showing reporting structure and decision flow",
+      "Integration with Salesforce is the #1 technical requirement",
+      "Tom defers to Marcus on technical evaluation",
+      "No next call scheduled with Sarah Chen (CFO)"
+    ],
+    "sentiment": "positive",
+    "action_items": ["Share API documentation with Marcus", "Send Salesforce integration specs", "Find way to get Sarah Chen on a call"],
+    "meddpicc": {
+      "metrics": "Marcus estimates 500+ hours/year saved across ops team",
+      "economic_buyer": "Sarah Chen, CFO (NOT present — not yet engaged despite Mark's 2-month-old promise)",
+      "decision_criteria": "Salesforce integration quality, ease of implementation, API documentation quality",
+      "paper_process": "Not discussed — rep said 'we'll figure out the process' when Marcus asked",
+      "identify_pain": "Manual reporting creating operational bottleneck, ops team spending 25% of time on data entry",
+      "champion": "Marcus Webb, Head of Ops — strong internal advocate, shared org chart, used 'we need this' language",
+      "competition": "Allvue demo scheduled next week per Marcus"
+    },
+    "full_transcript": [
+      {"speaker": "Jessica Ryan", "text": "Let me walk you through the Salesforce integration. Marcus, you mentioned that's the top priority?", "timestamp_sec": 0},
+      {"speaker": "Marcus Webb", "text": "Absolutely. If it doesn't sync with Salesforce, it's a non-starter. We're not adding another silo. Tom will back me up on this — we spent last year decommissioning three systems because of integration headaches.", "timestamp_sec": 12},
+      {"speaker": "Tom Chen", "text": "Marcus is right. Our CRM is the source of truth. Any platform we bring in needs to read and write deal data natively.", "timestamp_sec": 40},
+      {"speaker": "Jessica Ryan", "text": "Our platform has a native Salesforce connector. Let me show you how the bi-directional sync works.", "timestamp_sec": 58},
+      {"speaker": "Marcus Webb", "text": "This is exactly what we need. Seriously, this would save our ops team probably 500 hours a year. We need this.", "timestamp_sec": 90},
+      {"speaker": "Jessica Ryan", "text": "What does the decision process look like from here? Who else needs to see this?", "timestamp_sec": 120},
+      {"speaker": "Marcus Webb", "text": "We'll figure out the process. Let me share our org chart so you can see who reports to who.", "timestamp_sec": 132},
+      {"speaker": "Jessica Ryan", "text": "Great — and Sarah Chen, the CFO — has she seen any of this yet?", "timestamp_sec": 155},
+      {"speaker": "Marcus Webb", "text": "Not directly. Mark was going to brief her after our initial meeting. I'd say if we can show her the Salesforce integration and the ROI numbers, she'll be on board.", "timestamp_sec": 165},
+      {"speaker": "Tom Chen", "text": "Sarah is the key signature, but she delegates technical evaluation to Marcus and me. If we recommend it, she typically approves.", "timestamp_sec": 190}
+    ]
+  },
+  {
+    "call_id": "call-meridian-004",
+    "company": "Meridian Capital Partners",
+    "date": "2026-06-02",
+    "duration_seconds": 900,
+    "participants": ["Jessica Ryan (AE)", "Marcus Webb (Head of Ops)"],
+    "topics": ["status update", "internal progress", "Allvue comparison", "next steps"],
+    "key_points": [
+      "Marcus confirms they're leaning toward our solution vs Allvue",
+      "Allvue demo went well but Salesforce integration was 'clunky'",
+      "No progress getting Sarah Chen on a call — Marcus says 'she's busy till end of quarter'",
+      "Decision timeline slipping — originally Q3, now 'maybe September'",
+      "Marcus still a strong champion but can't unblock the economic buyer gap"
+    ],
+    "sentiment": "neutral",
+    "action_items": ["Prepare exec summary for Sarah Chen", "Find champion at CFO level"],
+    "meddpicc": {
+      "metrics": "No formal ROI document delivered yet",
+      "economic_buyer": "Sarah Chen, CFO (still not engaged — 3 months into process)",
+      "decision_criteria": "Still focused on integration — no broader business case presented",
+      "paper_process": "No procurement steps mapped — process is 'we'll figure it out'",
+      "identify_pain": "Pain confirmed but no quantification tied to dollar impact",
+      "champion": "Marcus Webb — strong but can't access economic buyer",
+      "competition": "Allvue still in consideration, decision not finalized"
+    },
+    "full_transcript": [
+      {"speaker": "Marcus Webb", "text": "Hey Jessica, wanted to give you an update. We had the Allvue demo last week.", "timestamp_sec": 0},
+      {"speaker": "Jessica Ryan", "text": "How did it go?", "timestamp_sec": 10},
+      {"speaker": "Marcus Webb", "text": "Honestly? Their Salesforce integration was clunky. Your platform is cleaner. The ops team is leaning your direction.", "timestamp_sec": 15},
+      {"speaker": "Jessica Ryan", "text": "That's great to hear. Have you had a chance to loop Sarah in yet?", "timestamp_sec": 35},
+      {"speaker": "Marcus Webb", "text": "I tried. She's swamped — quarter-end close. I sent her a summary but she hasn't responded. She said maybe September she can look at it properly.", "timestamp_sec": 45},
+      {"speaker": "Jessica Ryan", "text": "September? That's a slip from the original Q3 timeline.", "timestamp_sec": 65},
+      {"speaker": "Marcus Webb", "text": "I know. I'm pushing. But without her eyes on it, I can't get budget approval. She's the one who signs the checks.", "timestamp_sec": 72},
+      {"speaker": "Jessica Ryan", "text": "Is there any way we could put together a one-pager for her? Executive summary with ROI numbers?", "timestamp_sec": 88},
+      {"speaker": "Marcus Webb", "text": "That would help. If you can quantify the hours savings in dollar terms — Sarah responds to numbers. She's an Excel person at heart.", "timestamp_sec": 100},
+      {"speaker": "Jessica Ryan", "text": "Consider it done. I'll have something for you by end of week.", "timestamp_sec": 118}
+    ]
+  },
+  {
+    "call_id": "call-apex-001",
     "company": "Apex Analytics",
     "date": "2026-05-20",
     "duration_seconds": 1860,
     "participants": ["Tom Rivera (AE)", "Sarah Kim (CTO)"],
-    "topics": ["technical requirements", "integration needs", "timeline"],
+    "topics": ["technical requirements", "integration needs", "timeline", "decision process"],
     "key_points": [
       "Sarah wants API-first platform for custom dashboard integration",
       "Current stack doesn't support real-time data processing",
@@ -41,12 +165,24 @@
     "action_items": ["Share API documentation", "Schedule technical deep-dive with engineering team"],
     "meddpicc": {
       "metrics": "Dashboard refresh latency exceeds 5 minutes",
-      "economic_buyer": "CTO with CEO sign-off",
+      "economic_buyer": "CTO with CEO sign-off required above $100K",
       "decision_criteria": "API quality, data freshness, ease of integration",
-      "paper_process": "No formal process yet — early stage",
+      "paper_process": "No formal process yet — early stage evaluation",
       "identify_pain": "Slow dashboards causing missed insights during investor calls",
-      "champion": "Sarah Kim, CTO",
+      "champion": "Sarah Kim, CTO — technical pain owner",
       "competition": "Tableau (incumbent), Looker (considering)"
-    }
+    },
+    "full_transcript": [
+      {"speaker": "Tom Rivera", "text": "Sarah, tell me what's driving the evaluation. What's not working with your current setup?", "timestamp_sec": 0},
+      {"speaker": "Sarah Kim", "text": "Tableau is fine for static reporting, but our investors now expect real-time dashboards. Our data pipeline takes 5+ minutes to refresh. In a board meeting, that's an eternity.", "timestamp_sec": 15},
+      {"speaker": "Tom Rivera", "text": "So the latency is creating visibility gaps during investor conversations?", "timestamp_sec": 48},
+      {"speaker": "Sarah Kim", "text": "Exactly. We had an investor call last month where a key metric was 7 minutes stale. We quoted the wrong number. Embarrassing.", "timestamp_sec": 58},
+      {"speaker": "Tom Rivera", "text": "Who else is involved in the decision beyond you?", "timestamp_sec": 85},
+      {"speaker": "Sarah Kim", "text": "I lead the technical eval. For anything above $100K, I need CEO sign-off. But if the engineering team and I recommend it, he'll approve.", "timestamp_sec": 92},
+      {"speaker": "Tom Rivera", "text": "What's your timeline look like?", "timestamp_sec": 115},
+      {"speaker": "Sarah Kim", "text": "Technical evaluation through June. We want to make a decision in July. We're looking at Tableau alternatives and also evaluating Looker.", "timestamp_sec": 122},
+      {"speaker": "Tom Rivera", "text": "Do you have a budget range in mind?", "timestamp_sec": 145},
+      {"speaker": "Sarah Kim", "text": "Not finalized yet. That's part of what we'll figure out post-evaluation. Your pricing would need to be competitive with Tableau's enterprise tier.", "timestamp_sec": 152}
+    ]
   }
 ]
