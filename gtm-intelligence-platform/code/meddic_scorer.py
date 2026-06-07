@@ -159,3 +159,113 @@ def score_from_transcript(transcript_text: str) -> dict:
     scores["champion"] = min(10, champ_count + 3)
 
     return scores
+
+
+DIM_KEY_MAP = {
+    "metrics": "metrics", "m": "metrics",
+    "economic_buyer": "economic_buyer", "eb": "economic_buyer", "e": "economic_buyer",
+    "decision_criteria": "decision_criteria", "dc": "decision_criteria", "d1": "decision_criteria",
+    "decision_process": "decision_process", "dp": "decision_process", "d2": "decision_process",
+    "identified_pain": "identified_pain", "pain": "identified_pain", "i": "identified_pain",
+    "champion": "champion", "c": "champion",
+}
+
+
+def _display_scored(scores: dict, scored: dict, nba: dict, ctx: dict) -> str:
+    lines = ["", "  MEDDIC Scorecard", "  " + "-" * 50]
+    for d in scored["dimension_scores"]:
+        gap_mark = " ! GAP" if d["is_gap"] else "      "
+        risk_tag = f"  ({d['risk_label'].upper()})" if d["is_gap"] else ""
+        lines.append(f"  {d['label']:30s} {d['score']:2d}/10{gap_mark}{risk_tag}")
+    lines.append("  " + "-" * 50)
+    lines.append(f"  Completeness:  {scored['meddic_completeness']:2d}/100    Gaps: {scored['gap_count']}")
+    if nba.get("nba_text"):
+        lines.append(f"  Top gap:       {scored['top_gap']}")
+        lines.append(f"  NBA:           {nba['nba_text']}")
+    return "\n".join(lines)
+
+
+def _cli_entry():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="MEDDIC Deal Scorer — interactive scorecard REPL")
+    parser.add_argument("--interactive", "-i", action="store_true", help="REPL loop for live score adjustment")
+    parser.add_argument("--metrics", type=int, default=5, choices=range(0, 11), metavar="[0-10]")
+    parser.add_argument("--economic-buyer", "--eb", type=int, default=5, choices=range(0, 11), metavar="[0-10]")
+    parser.add_argument("--decision-criteria", "--dc", type=int, default=5, choices=range(0, 11), metavar="[0-10]")
+    parser.add_argument("--decision-process", "--dp", type=int, default=5, choices=range(0, 11), metavar="[0-10]")
+    parser.add_argument("--identified-pain", "--pain", type=int, default=5, choices=range(0, 11), metavar="[0-10]")
+    parser.add_argument("--champion", type=int, default=5, choices=range(0, 11), metavar="[0-10]")
+    parser.add_argument("--champion-name", default="the champion")
+    parser.add_argument("--company", default="the company")
+    parser.add_argument("--eb-name", default="the economic buyer")
+    args = parser.parse_args()
+
+    scores = {
+        "metrics": args.metrics,
+        "economic_buyer": args.economic_buyer,
+        "decision_criteria": args.decision_criteria,
+        "decision_process": args.decision_process,
+        "identified_pain": args.identified_pain,
+        "champion": args.champion,
+    }
+    ctx = {
+        "champion_name": args.champion_name,
+        "company": args.company,
+        "eb_name": args.eb_name,
+    }
+
+    def run(scores):
+        scored = score_dimensions(scores)
+        nba = generate_nba(scored, ctx)
+        print(_display_scored(scores, scored, nba, ctx))
+        return scored, nba
+
+    run(scores)
+
+    if not args.interactive:
+        return
+
+    print("\n  Interactive mode. Type commands:")
+    print("    metrics=7  eb=3  dc=8  dp=2  pain=9  champion=6")
+    print("    help  quit")
+    while True:
+        try:
+            cmd = input("\n  > ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not cmd:
+            continue
+        if cmd in ("quit", "q", "exit"):
+            break
+        if cmd in ("help", "?"):
+            print("  Set dimension scores: metrics=7, eb=3, dc=8, dp=2, pain=9, champion=6")
+            print("  Aliases: m, e, eb, d1, dc, d2, dp, i, pain, c")
+            continue
+        parts = cmd.replace(",", " ").split()
+        changed = False
+        for p in parts:
+            if "=" not in p:
+                continue
+            key_raw, val_raw = p.split("=", 1)
+            key_raw = key_raw.strip().lower()
+            real_key = DIM_KEY_MAP.get(key_raw)
+            if not real_key:
+                print(f"  Unknown dimension: {key_raw}. Try help.")
+                continue
+            try:
+                val = int(val_raw.strip())
+                if val < 0 or val > 10:
+                    print(f"  Score must be 0-10, got {val}")
+                    continue
+                scores[real_key] = val
+                changed = True
+            except ValueError:
+                print(f"  Invalid score: {val_raw}")
+        if changed:
+            run(scores)
+
+
+if __name__ == "__main__":
+    _cli_entry()
