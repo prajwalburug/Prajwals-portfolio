@@ -10,7 +10,7 @@ I build go-to-market systems that turn fragmented tools, messy data, and manual 
 |--|---------|-----------|---------|------|------|
 | 1 | **Wati AI-First GTM Engine** | Lead Lifecycle · Pipeline Intelligence · Outbound Detection | Scaling revenue without scaling headcount for a 16K+ customer WhatsApp platform | HubSpot · n8n · Python · LLM · Clay · SQL | [`wati-gtm-engine/`](./wati-gtm-engine) |
 | 2 | **AI Content Studio** | Research · Generation · Repurposing · Brand Compilation | Inconsistent brand voice across LinkedIn, email, and blog | Obsidian · Python · Firecrawl · n8n · Claude/ChatGPT | [`ai-content-studio/`](./ai-content-studio) |
-| 3 | **GTM Intelligence Platform** | Account Research & Competitive Intelligence | MCP-native AI agents for revenue intelligence | Python · MCP · Claude · PostgreSQL · Clay | [`gtm-intelligence-platform/`](./gtm-intelligence-platform) |
+| 3 | **GTM Intelligence Platform** | Account Research + Deal Intelligence (MEDDIC) | MCP-native AI agents for revenue intelligence | Python · MCP · Claude · PostgreSQL · Clay · Gong | [`gtm-intelligence-platform/`](./gtm-intelligence-platform) |
 
 ### 1. Wati AI-First GTM Engine
 
@@ -72,23 +72,36 @@ Signals ──► Scout (jobs/funding/leadership/tech) ──► Prioritizer ─
 
 **The Problem:** Sales reps waste hours researching accounts before outreach. Data lives in silos — CRM here, enrichment there, signals everywhere. No single view tells a rep "is this worth my time, and what should I say?"
 
-**What We Built:** An MCP-native agent that automates the full account research pipeline — enrichment, signal scoring, competitive intel, brief generation, and email drafting — in one shot.
+**What We Built:** Two MCP-native agents (Account Research + Deal Intelligence) that automate the full revenue intelligence pipeline — enrichment, signal scoring, MEDDIC analysis, deal health scoring, and next best actions.
 
-**Pipeline (7 steps):**
+**Agent 1 — Account Research Pipeline (7 steps):**
 1. CRM context pull (`search_deals`)
 2. Firmographic enrichment (`enrich_account` — Clay mock)
-3. Web signal search (`search_web` — news, jobs, exec changes)
+3. Web signal search (`search_web`)
 4. Weighted intent scoring (funding 3x, exec 2.5x, hiring 2x, tech 1.5x)
-5. Competitive intelligence overlay (incumbent detection, switching signals)
-6. Structured brief generation + personalized email
+5. Competitive intelligence overlay
+6. Structured brief + personalized email generation
 7. Write-back to file store + database
 
+**Agent 2 — Deal Intelligence Pipeline (8 steps):**
+1. Context assembly (deal owner, stage, ACV, ICP from Agent 1)
+2. Transcript fetch (`get_transcript` — Gong mock, 5 multi-turn calls)
+3. MEDDIC analysis (6 dimensions: Metrics, EB, DC1, DC2, Pain, Champion)
+4. Gap detection (dimensions below 5/10, ranked by risk weight)
+5. Similar deal search (mock pgvector against 3 closed-won comps)
+6. Composite health score (MEDDIC 40%, ICP 20%, velocity 15%, engagement 10%, ACV 10%, comp 5%)
+7. Next best action generation (single NBA from top risk-weighted gap)
+8. Governed write-back (`_c` custom fields only) + structured Agent 3 handoff
+
 **Why It Works:**
-- MCP-native: 6 typed tools expose via stdio transport — works in Claude Code, OpenCode, or any MCP client
-- Weighted signal scoring engine normalizes multiple signals into a single 0-100 ICP fit score
-- Portable skills layer: 3 markdown skills (`account-research.md`, `signal-scoring.md`, `brief-gen.md`) load into any AI
+- MCP-native: 9 typed tools via stdio transport — works in any MCP client
+- MEDDIC scoring engine with interactive REPL — live recalc on every dimension change
+- Composite deal health scoring across 6 weighted factors
+- Governed `score_opp` tool: writes `_c` custom fields only, never canonical CRM fields
+- Chain handoff between agents via structured JSON — no prose re-parsing
+- Portable skills layer: 6 markdown skills + 5 `.prompt` files load into any AI
 - All tools support `--demo` + `--dry-run` modes
-- Clay + Gong mocks mirror real API shapes — proves integration understanding
+- Gong mock returns 5 multi-turn calls with full speaker-turn transcripts
 
 **Tech Stack:** Python 3 · MCP SDK · Claude API · PostgreSQL + pgvector · Redis · Clay (mock) · Gong (mock)
 
