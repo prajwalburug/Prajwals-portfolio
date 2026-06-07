@@ -28,8 +28,10 @@ from mcp.types import (
 # Import local modules
 sys.path.insert(0, os.path.dirname(__file__))
 from clay_mock import enrich_account as clay_enrich
-from gong_mock import get_transcript as gong_transcript
+from gong_mock import get_transcripts as gong_transcripts, get_transcript as gong_transcript_by_id
 from signal_scorer import score_signals, recommend_engagement_priority
+from meddic_scorer import score_dimensions, generate_nba, score_from_transcript
+from deal_scorer import score_deal_health
 
 server = Server("gtm-intelligence")
 
@@ -132,6 +134,114 @@ def generate_email(context: dict, tone: str = "professional") -> dict:
     }
 
 
+# ── Agent 2 Tool Implementations ──
+
+def get_transcript(company: str = "", call_id: str = "", max_results: int = 3) -> list[dict] | dict:
+    """Fetch call transcripts for a company or by call ID."""
+    if call_id:
+        return gong_transcript_by_id(call_id)
+    return gong_transcripts(company=company, max_results=max_results)
+
+
+def score_opp(deal_id: str, meddic_scores: dict, deal_context: dict | None = None) -> dict:
+    """Score an opportunity with MEDDIC + deal health.
+
+    GOVERNANCE: Writes only to custom fields (_c suffix). Never writes to
+    canonical Salesforce fields (StageName, CloseDate, Amount, etc.).
+    """
+    # Score MEDDIC dimensions
+    meddic_result = score_dimensions(meddic_scores)
+
+    # Generate NBA
+    nba = generate_nba(meddic_result, deal_context)
+
+    # Compute deal health
+    health = score_deal_health(
+        meddic_completeness=meddic_result["meddic_completeness"],
+        account_icp_score=(deal_context or {}).get("icp_score", 50),
+        stage=(deal_context or {}).get("stage", "discovery"),
+        stage_created_days_ago=(deal_context or {}).get("stage_days", 30),
+        last_call_days_ago=(deal_context or {}).get("days_since_last_call", 14),
+        acv=(deal_context or {}).get("acv", 100000),
+        has_competitor=(deal_context or {}).get("has_competitor", False),
+    )
+
+    # Governance: only _c suffixed fields
+    scorecard = {
+        "deal_health_score__c": health["total_score"],
+        "deal_health_label__c": health["health_label"],
+        "meddic_completeness__c": meddic_result["meddic_completeness"],
+        "meddic_scores__c": {d["key"]: d["score"] for d in meddic_result["dimension_scores"]},
+        "meddic_gap_count__c": meddic_result["gap_count"],
+        "meddic_top_gap__c": meddic_result["top_gap"],
+        "meddic_gaps__c": [{"dimension": g["key"], "score": g["score"], "risk": g["risk_label"]} for g in meddic_result["gaps"]],
+        "nba_text__c": nba["nba_text"],
+        "nba_action__c": nba["action"],
+        "last_scored_at__c": datetime.now(timezone.utc).isoformat(),
+        "health_warnings__c": health["warnings"],
+    }
+
+    return {
+        "deal_id": deal_id,
+        "scorecard": scorecard,
+        "meddic_analysis": meddic_result,
+        "deal_health": health,
+        "next_best_action": nba,
+        "governance_note": "Written to custom fields (_c) only. Canonical CRM fields unchanged.",
+    }
+
+
+def search_similar_deals(company: str = "", meddic_profile: dict | None = None) -> list[dict]:
+    """Find similar closed-won deals by MEDDIC profile similarity.
+
+    Mock pgvector search. In production, uses pgvector cosine similarity
+    against deal_embeddings table.
+    """
+    similar_deals = [
+        {
+            "company": "Atlas PE Partners",
+            "outcome": "closed_won",
+            "acv": 3100000,
+            "days_to_close": 94,
+            "meddic_profile": {"metrics": 8, "economic_buyer": 9, "decision_criteria": 7, "decision_process": 8, "identified_pain": 9, "champion": 8},
+            "winning_patterns": {
+                "eb_engaged_by_stage": 2,
+                "key_factors": ["CFO was primary sponsor from stage 2", "ROI document delivered before eval board", "Champion shared internal budget memo"],
+                "objections_handled": ["Integration complexity mitigated with phased rollout", "Price objection addressed with 3-year TCO comparison"],
+            },
+        },
+        {
+            "company": "Silver Lake Portfolio Co",
+            "outcome": "closed_won",
+            "acv": 1800000,
+            "days_to_close": 76,
+            "meddic_profile": {"metrics": 7, "economic_buyer": 8, "decision_criteria": 8, "decision_process": 7, "identified_pain": 8, "champion": 9},
+            "winning_patterns": {
+                "eb_engaged_by_stage": 2,
+                "key_factors": ["VP Ops became executive sponsor", "Board-level pain (regulatory deadline) created urgency", "Competitor disqualified on integration"],
+                "objections_handled": ["Switching cost justified with 18-month payback model", "Implementation disruption mitigated with parallel run"],
+            },
+        },
+        {
+            "company": "Bain Capital Tech",
+            "outcome": "closed_won",
+            "acv": 4200000,
+            "days_to_close": 112,
+            "meddic_profile": {"metrics": 9, "economic_buyer": 7, "decision_criteria": 8, "decision_process": 6, "identified_pain": 9, "champion": 7},
+            "winning_patterns": {
+                "eb_engaged_by_stage": 3,
+                "key_factors": ["LPs threatening to withdraw capital created urgency", "CFO engaged at stage 3 after champion intro", "Multi-year contract won board favor"],
+                "objections_handled": ["Platform migration risk addressed with dedicated CSM", "Integration timeline concern reduced with phased approach"],
+            },
+        },
+    ]
+
+    if company:
+        return [d for d in similar_deals if company.lower() in d["company"].lower()]
+
+    return similar_deals
+
+
 # ── MCP Definitions ──
 
 @server.list_tools()
@@ -208,6 +318,57 @@ async def list_tools() -> list[Tool]:
                 "required": ["context"],
             },
         ),
+        # Agent 2 tools
+        Tool(
+            name="get_transcript",
+            description="Fetch call transcripts for a company (last N) or by call ID. Returns full speaker-turn text.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "company": {"type": "string", "description": "Company name to find calls for"},
+                    "call_id": {"type": "string", "description": "Specific call ID (alternative to company)"},
+                    "max_results": {"type": "number", "description": "Max transcripts to return (default 3)"},
+                },
+            },
+        ),
+        Tool(
+            name="score_opp",
+            description="Score an opportunity: MEDDIC analysis + deal health + next best action. GOVERNANCE: writes to _c custom fields only, never canonical CRM fields.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "deal_id": {"type": "string", "description": "Deal/opportunity ID"},
+                    "meddic_scores": {
+                        "type": "object",
+                        "description": "MEDDIC dimension scores 0-10: metrics, economic_buyer, decision_criteria, decision_process, identified_pain, champion",
+                        "properties": {
+                            "metrics": {"type": "number"},
+                            "economic_buyer": {"type": "number"},
+                            "decision_criteria": {"type": "number"},
+                            "decision_process": {"type": "number"},
+                            "identified_pain": {"type": "number"},
+                            "champion": {"type": "number"},
+                        },
+                    },
+                    "deal_context": {
+                        "type": "object",
+                        "description": "Optional deal context: icp_score, stage, stage_days, days_since_last_call, acv, has_competitor, champion_name, company, eb_name",
+                    },
+                },
+                "required": ["deal_id", "meddic_scores"],
+            },
+        ),
+        Tool(
+            name="search_similar_deals",
+            description="Find similar closed-won deals by MEDDIC profile (mock pgvector similarity)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "company": {"type": "string", "description": "Company name to filter by"},
+                    "meddic_profile": {"type": "object", "description": "MEDDIC scores dict for similarity matching"},
+                },
+            },
+        ),
     ]
 
 
@@ -226,6 +387,12 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             result = summarize_text(arguments["text"], arguments.get("max_points", 5))
         elif name == "generate_email":
             result = generate_email(arguments["context"], arguments.get("tone", "professional"))
+        elif name == "get_transcript":
+            result = get_transcript(arguments.get("company", ""), arguments.get("call_id", ""), arguments.get("max_results", 3))
+        elif name == "score_opp":
+            result = score_opp(arguments["deal_id"], arguments["meddic_scores"], arguments.get("deal_context", {}))
+        elif name == "search_similar_deals":
+            result = search_similar_deals(arguments.get("company", ""), arguments.get("meddic_profile"))
         else:
             raise ValueError(f"Unknown tool: {name}")
 
@@ -256,6 +423,14 @@ async def list_prompts() -> list[Prompt]:
                 PromptArgument(name="company", description="Company name to research", required=True),
             ],
         ),
+        Prompt(
+            name="score_deal",
+            description="Full deal scoring workflow: transcripts -> MEDDIC -> gap detection -> deal health -> NBA",
+            arguments=[
+                PromptArgument(name="deal_id", description="Deal/opportunity ID to score", required=True),
+                PromptArgument(name="company", description="Company name for transcript lookup", required=True),
+            ],
+        ),
     ]
 
 
@@ -279,6 +454,28 @@ async def get_prompt(name: str, arguments: dict[str, str] | None = None) -> GetP
                         f"7. Generate outreach email\n\n"
                         f"Return a complete account brief with: company snapshot, top 3 signals, "
                         f"competitive landscape, recommended angle, ICP score, and drafted email.",
+                    ),
+                )
+            ],
+        )
+    elif name == "score_deal":
+        deal_id = arguments.get("deal_id", "Unknown") if arguments else "Unknown"
+        company = arguments.get("company", "Unknown") if arguments else "Unknown"
+        return GetPromptResult(
+            messages=[
+                PromptMessage(
+                    role="user",
+                    content=TextContent(
+                        type="text",
+                        text=f"Score the deal {deal_id} for {company}. Follow this pipeline:\n"
+                        f"1. Fetch transcripts with get_transcript(company={company})\n"
+                        f"2. Analyze each transcript for MEDDIC signals\n"
+                        f"3. Score MEDDIC dimensions using the meddic-analysis.md skill\n"
+                        f"4. Detect gaps (dimensions below 5/10)\n"
+                        f"5. Call score_opp with dimension scores to compute deal health + NBA\n"
+                        f"6. Search similar deals with search_similar_deals\n"
+                        f"7. Return complete deal scorecard: MEDDIC scores, gaps, deal health, "
+                        f"NBA, similar deal patterns, and coaching note.",
                     ),
                 )
             ],
